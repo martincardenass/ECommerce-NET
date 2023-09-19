@@ -1,8 +1,7 @@
 ﻿using ECommerce_NET.Interfaces;
 using ECommerce_NET.Models;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
 
 namespace ECommerce_NET.Controllers
 {
@@ -17,6 +16,7 @@ namespace ECommerce_NET.Controllers
             _itemService = itemService;
         }
 
+        [Authorize(Roles = "user")]
         [HttpGet("items")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
         public async Task<IActionResult> GetItems()

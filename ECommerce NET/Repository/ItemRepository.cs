@@ -38,5 +38,22 @@ namespace ECommerce_NET.Repository
 
             return itemDtos;
         }
+
+        public async Task<int> NewItem(Item item)
+        {
+            var newItem = new Item()
+            {
+                Item_Name = item.Item_Name,
+                Item_Description = item.Item_Description,
+                Added = DateTime.UtcNow,
+                Category_Id = item.Category_Id
+            };
+
+            _context.Add(newItem);
+
+            _ = await _context.SaveChangesAsync();
+
+            return newItem.Item_Id;
+        }
     }
 }

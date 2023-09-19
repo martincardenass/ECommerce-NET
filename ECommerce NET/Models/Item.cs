@@ -5,7 +5,7 @@
         public int Item_Id { get; set; }
         public string Item_Name { get; set; }
         public string Item_Description { get; set; }
-        public DateTime Added { get; set; }
+        public DateTimeOffset Added { get; set; }
         public int Category_Id { get; set; }
         public Category? Category { get; set; }
         public ICollection<ItemVariant> Variants { get; set; } // * Variants nav property
