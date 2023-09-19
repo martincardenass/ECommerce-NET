@@ -17,27 +17,80 @@ namespace ECommerce_NET.Repository
             _imageService = imageService;
         }
 
-        public async Task<bool> AuthenticateUser(string username, string password)
+        public async Task<(bool authenticated, string result, UserLimitedDto user)> AuthenticateUser(string username, string password)
         {
-            if(await UsernameExists(username) && !string.IsNullOrEmpty(password))
+            bool? isAccountLocked = await IsAccountLocked(username);
+
+            // Explicit check because of nullable bool
+            if(isAccountLocked == true)
             {
-                string? hashedPasswordFromDatabse = await _context.Users
-                    .Where(u => u.Username == username)
-                    .Select(u => u.Password)
-                    .FirstOrDefaultAsync();
-                    
-                if(BCrypt.Net.BCrypt.Verify(password, hashedPasswordFromDatabse))
+                return (false, "Your account has been locked", null);
+            }
+
+            if (await UsernameExists(username) && !string.IsNullOrEmpty(password))
+            {
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Username == username);
+
+                if (user == null)
                 {
-                    return true;
+                    return (false, "Something went wrong", null);
+                }
+
+                // Handle login attempts being null
+                int loginAttempts = user.Login_Attempts ?? 0;
+
+                if (BCrypt.Net.BCrypt.Verify(password, user?.Password))
+                {
+                    // * Reset the login attempts to 0 (if any). Account locks can only be removed by admins (later to add).
+                    if (loginAttempts > 0) {
+                        user.Login_Attempts = 0;
+                        _ = await _context.SaveChangesAsync();
+                    }
+
+                    var userToReturn = new UserLimitedDto
+                    {
+                        User_Id = user.User_Id,
+                        Username = user.Username,
+                        Profile_Picture = user.Profile_Picture
+                    };
+
+                    return (true, $"Welcome, {user.Username}", userToReturn);
+                } else
+                {
+                    // * Every failed login attempt adds +1 to the login attemps, if 5, account will be locked
+                    loginAttempts++;
+                    user.Login_Attempts = loginAttempts;
+                    _ = await _context.SaveChangesAsync();
+                    return (
+                        false,
+                        $"Wrong password. You have tried {user.Login_Attempts}/5 times", null
+                        );
                 }
             }
-            return false;
+            return (false, "Something went wrong", null);
         }
 
         public async Task<User> GetUser(string username)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<bool?> IsAccountLocked(string username)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username.Equals(username));
+
+            // Users can attempt up to 5 times, after 5 failed attemps we block the account
+            if(user.Login_Attempts.HasValue && user.Login_Attempts >= 5)
+            {
+                user.Lockout_Enabled = true;
+                //_context.Update(user);
+                _ = await _context.SaveChangesAsync();
+            }
+
+            return user.Lockout_Enabled;
         }
 
         public async Task<bool> IsEmailRegistered(string email)

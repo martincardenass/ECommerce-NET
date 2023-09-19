@@ -21,19 +21,13 @@ namespace ECommerce_NET.Controllers
         }
         [HttpPost("login")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<UserLimitedDto>))]
+        [ProducesResponseType(401)]
         public async Task<IActionResult> Login([FromForm] UserDto user)
         {
-            bool userExists = await _userService.UsernameExists(user.Username);
+            var isUserAuthenticated = await _userService.AuthenticateUser(user.Username, user.Password);
 
-            if(!userExists)
-            {
-                return BadRequest();
-            }
-
-            bool isUserAuthenticated = await _userService.AuthenticateUser(user.Username, user.Password);
-
-            if (isUserAuthenticated)
+            if (isUserAuthenticated.authenticated)
             {
                 var userLogged = await _userService.GetUser(user.Username);
                 var claims = new List<Claim>
@@ -54,7 +48,26 @@ namespace ECommerce_NET.Controllers
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity), authProperties);
 
-                return Ok();
+                var loginResponse = new LoginResponseDto
+                {
+                    IsAuthenticated = isUserAuthenticated.authenticated, 
+                    Message = isUserAuthenticated.result,
+                    User = isUserAuthenticated.user
+                };
+
+                return Ok(loginResponse);
+            }
+
+            else if (!isUserAuthenticated.authenticated)
+            {
+                var loginResponseUnauthorized = new LoginResponseDto
+                {
+                    IsAuthenticated = isUserAuthenticated.authenticated,
+                    Message = isUserAuthenticated.result,
+                    User = isUserAuthenticated.user
+                };
+
+                return Unauthorized(loginResponseUnauthorized);
             }
 
             return NoContent();
@@ -92,24 +105,6 @@ namespace ECommerce_NET.Controllers
             {
                 return Unauthorized();
             }
-        }
-
-        [Authorize]
-        [HttpGet("claims")]
-        //[HttpPatch("update")]
-        public async Task<IActionResult> Claims()
-        {
-            //var userClaims = HttpContext.User.Claims.Select(claim => new
-            //{
-            //    claim.Type,
-            //    claim.Value
-            //});
-
-            //return Ok(userClaims);
-
-            var id = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-
-            return Ok(id);
         }
     }
 }

@@ -14,5 +14,7 @@
         public string Email { get; set; }
         public DateTimeOffset Created { get; set; }
         public ICollection<Review>? Reviews { get; set; } // * Reviews navigation property
+        public bool? Lockout_Enabled { get; set; }
+        public int? Login_Attempts { get; set; }
     }
 }
