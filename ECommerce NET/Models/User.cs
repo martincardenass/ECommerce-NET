@@ -16,5 +16,6 @@
         public ICollection<Review>? Reviews { get; set; } // * Reviews navigation property
         public bool? Lockout_Enabled { get; set; }
         public int? Login_Attempts { get; set; }
+        public DateTimeOffset? Locked_Until { get; set; }
     }
 }

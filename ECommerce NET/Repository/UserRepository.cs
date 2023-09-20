@@ -24,7 +24,13 @@ namespace ECommerce_NET.Repository
             // Explicit check because of nullable bool
             if(isAccountLocked == true)
             {
-                return (false, "Your account has been locked", null);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Username.Equals(username));
+
+                return (
+                    false,
+                    $"Access to your account is currently restricted until {user.Locked_Until}. You can try again after this time.",
+                    null);
             }
 
             if (await UsernameExists(username) && !string.IsNullOrEmpty(password))
@@ -82,12 +88,33 @@ namespace ECommerce_NET.Repository
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
 
-            // Users can attempt up to 5 times, after 5 failed attemps we block the account
-            if(user.Login_Attempts.HasValue && user.Login_Attempts >= 5)
+            if(user == null)
+            {
+                return null;
+            }
+
+            if(user.Login_Attempts >= 5)
             {
                 user.Lockout_Enabled = true;
-                //_context.Update(user);
+                user.Login_Attempts = 0;
+                user.Locked_Until = DateTime.UtcNow.AddMinutes(5); //  Add acount lock for 5 minutes
                 _ = await _context.SaveChangesAsync();
+            }
+
+            if(user.Lockout_Enabled == true)
+            {
+                // less than zero: 1st earlier than 2nd
+                // greater than zero: 1st later than 2nd
+                int dateComparasion = DateTimeOffset.Compare(DateTimeOffset.UtcNow, user.Locked_Until.Value);
+
+                if(dateComparasion > 0)
+                {
+                    // Account lock already passed
+                    user.Locked_Until = null;
+                    user.Lockout_Enabled = false;
+                    user.Login_Attempts = 0;
+                    _ = await _context.SaveChangesAsync();
+                }
             }
 
             return user.Lockout_Enabled;
