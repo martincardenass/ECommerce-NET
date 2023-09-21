@@ -1,7 +1,10 @@
-﻿namespace ECommerce_NET.Interfaces
+﻿using ECommerce_NET.Models;
+
+namespace ECommerce_NET.Interfaces
 {
     public interface IImage
     {
         Task<string> UploadToCloudinary(IFormFile file, int width, int height);
+        Task<ICollection<Image>> AddImagesToItem(ICollection<IFormFile> images, int imageId);
     }
 }

@@ -1,5 +1,4 @@
-﻿using ECommerce_NET.Data;
-using ECommerce_NET.Interfaces;
+﻿using ECommerce_NET.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

@@ -1,4 +1,5 @@
-﻿using ECommerce_NET.Interfaces;
+﻿using ECommerce_NET.Dto;
+using ECommerce_NET.Interfaces;
 using ECommerce_NET.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +18,43 @@ namespace ECommerce_NET.Controllers
         }
 
         [Authorize(Roles = "user")]
-        [HttpGet("items")]
+        [HttpGet("all")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
         public async Task<IActionResult> GetItems()
         {
             var items = await _itemService.GetItems();
 
             return Ok(items);
+        }
+
+        [Authorize(Roles = "user")]
+        [HttpGet("{itemId}")]
+        [ProducesResponseType(200, Type = typeof(Item))]
+        public async Task<IActionResult> GetItemById(int itemId)
+        {
+            var item = await _itemService.GetItemById(itemId);
+
+            return Ok(item);
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost("new")]
+        [ProducesResponseType(200, Type = typeof(Item))]
+        public async Task<IActionResult> CreateNewItem([FromForm] Item item, [FromForm] List<IFormFile?> images)
+        {
+            var (newItem, imageCollection) = await _itemService.NewItem(item, images);
+
+            var itemDto = new NewItemDto
+            {
+                Item_Id = newItem.Item_Id,
+                Item_Name = newItem.Item_Name,
+                Item_Description = newItem.Item_Description,
+                Added = newItem.Added,
+                Category_Id = newItem.Category_Id,
+                Images = imageCollection
+            };
+
+            return Ok(itemDto);
         }
     }
 }

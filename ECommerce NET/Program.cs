@@ -12,6 +12,7 @@ builder.Services.AddScoped<IItem, ItemRepository>();
 builder.Services.AddScoped<IUser, UserRepository>();
 builder.Services.AddScoped<IImage, ImageRepository>();
 builder.Services.AddScoped<INotification, NotificationRepository>();
+builder.Services.AddScoped<ICategory, CategoryRepository>();
 
 // Add services to the container.
 

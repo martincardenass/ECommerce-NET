@@ -36,9 +36,9 @@ namespace ECommerce_NET.Repository
             if (await UsernameExists(username) && !string.IsNullOrEmpty(password))
             {
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Username == username);
+                    .FirstOrDefaultAsync(u => u.Username.Equals(username));
 
-                if (user == null)
+                if (user is null)
                 {
                     return (false, "Something went wrong", null);
                 }
@@ -80,7 +80,7 @@ namespace ECommerce_NET.Repository
         public async Task<User> GetUser(string username)
         {
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username);
+                .FirstOrDefaultAsync(u => u.Username.Equals(username));
         }
 
         public async Task<bool?> IsAccountLocked(string username)
@@ -88,7 +88,7 @@ namespace ECommerce_NET.Repository
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
 
-            if(user == null)
+            if(user is null)
             {
                 return null;
             }
@@ -134,7 +134,7 @@ namespace ECommerce_NET.Repository
 
         public async Task<bool> IsEmailRegistered(string email)
         {
-            return await _context.Users.AnyAsync(u => u.Email == email);
+            return await _context.Users.AnyAsync(u => u.Email.Equals(email));
         }
 
         public async Task<bool> RegisterUser(User user, IFormFile file)
@@ -178,7 +178,7 @@ namespace ECommerce_NET.Repository
             var userToModify = await _context.Users
                 .FindAsync(userId);
 
-            if(userToModify != null)
+            if(userToModify is not null)
             {
                 userToModify.First_Name = user.First_Name ?? userToModify.First_Name;
                 userToModify.Last_Name = user.Last_Name ?? userToModify.Last_Name;
@@ -197,7 +197,7 @@ namespace ECommerce_NET.Repository
 
         public async Task<bool> UsernameExists(string username)
         {
-            return await _context.Users.AnyAsync(u => u.Username == username);
+            return await _context.Users.AnyAsync(u => u.Username.Equals(username));
         }
     }
 }
