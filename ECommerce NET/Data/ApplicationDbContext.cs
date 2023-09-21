@@ -15,6 +15,7 @@ namespace ECommerce_NET.Data
         public DbSet<ItemVariant> ItemVariants { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,8 +62,13 @@ namespace ECommerce_NET.Data
             modelBuilder.Entity<User>()
                 .HasKey(u => u.User_Id);
 
-            //modelBuilder.Entity<User>()
-            //    .HasOne
+            modelBuilder.Entity<Notification>()
+                .HasKey(n => n.Notification_Id);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(nu => nu.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(u => u.Receiver_Id);
         }
     }
 }

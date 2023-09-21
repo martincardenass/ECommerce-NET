@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddScoped<IItem, ItemRepository>();
 builder.Services.AddScoped<IUser, UserRepository>();
 builder.Services.AddScoped<IImage, ImageRepository>();
+builder.Services.AddScoped<INotification, NotificationRepository>();
 
 // Add services to the container.
 

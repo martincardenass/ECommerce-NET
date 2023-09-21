@@ -13,7 +13,8 @@
         public DateTimeOffset Last_Login { get; set; }
         public string Email { get; set; }
         public DateTimeOffset Created { get; set; }
-        public ICollection<Review>? Reviews { get; set; } // * Reviews navigation property
+        public ICollection<Review>? Reviews { get; set; } // Reviews navigation property
+        public ICollection<Notification>? Notifications { get; set; } // Notifications navigation property
         public bool? Lockout_Enabled { get; set; }
         public int? Login_Attempts { get; set; }
         public DateTimeOffset? Locked_Until { get; set; }

@@ -19,6 +19,7 @@ namespace ECommerce_NET.Controllers
         {
             _userService = userService;
         }
+
         [HttpPost("login")]
         [ProducesResponseType(204)]
         [ProducesResponseType(200, Type = typeof(IEnumerable<UserLimitedDto>))]
@@ -88,8 +89,8 @@ namespace ECommerce_NET.Controllers
         public async Task<IActionResult> UpdateUser(int userId, [FromForm] UserUpdateDto user, [FromForm] IFormFile? file)
         {
             // * Extract ID from claims for access control
-            var idString = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-            _ = int.TryParse(idString, out int id);
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            _ = int.TryParse(userIdClaim, out int id);
 
             if (!ModelState.IsValid)
             {

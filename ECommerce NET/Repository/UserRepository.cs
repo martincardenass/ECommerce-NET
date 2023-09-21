@@ -98,6 +98,18 @@ namespace ECommerce_NET.Repository
                 user.Lockout_Enabled = true;
                 user.Login_Attempts = 0;
                 user.Locked_Until = DateTime.UtcNow.AddMinutes(5); //  Add acount lock for 5 minutes
+
+                // Send a notification to the user letting them know someone tried to access their account
+                var notification = new Notification
+                {
+                    Notification_Type = "System",
+                    Notification_Value = "Your account was temporary blocked because of multiple failed login attempts.",
+                    Receiver_Id = user.User_Id,
+                    Created = DateTime.UtcNow
+                };
+
+                _context.Add(notification);
+
                 _ = await _context.SaveChangesAsync();
             }
 
