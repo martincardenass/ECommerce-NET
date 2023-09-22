@@ -17,6 +17,12 @@ namespace ECommerce_NET.Repository
             _imageService = imageService;
         }
 
+        public async Task<bool> DoesItemExist(int itemId)
+        {
+            return await _context.Items
+                .AnyAsync(i => i.Item_Id.Equals(itemId));
+        }
+
         public async Task<Item> GetItemById(int id)
         {
             return await _context.Items
@@ -82,13 +88,11 @@ namespace ECommerce_NET.Repository
             {
                 var imgs = await _imageService.AddImagesToItem(images, newItem.Item_Id);
 
-                var imagesToDto = imgs.Select(i => new ImageDto
+                imageCollection.AddRange(imgs.Select(i => new ImageDto
                 {
                     Image_Id = i.Item_Id,
                     Image_Url = i.Image_Url
-                }).ToList();
-
-                imageCollection.AddRange(imagesToDto);
+                }).ToList());
             }
 
             return (newItem, imageCollection);

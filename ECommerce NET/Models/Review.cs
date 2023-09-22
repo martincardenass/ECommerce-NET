@@ -6,6 +6,7 @@
         public string Review_Title { get; set; }
         public string Review_Content { get; set; }
         public DateTimeOffset Added { get; set; }
+        public DateTimeOffset? Modified { get; set; }
         public int User_Id { get; set; } // * Ref to users table
         public int Item_Id { get; set; } // * Ref to items table
         public User? User { get; set; }

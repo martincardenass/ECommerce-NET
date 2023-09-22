@@ -8,6 +8,7 @@ namespace ECommerce_NET.Interfaces
         Task<ICollection<Item>> GetItems();
         Task<ICollection<Item>> ItemSelectionQuery();
         Task<Item> GetItemById(int id);
+        Task<bool> DoesItemExist(int itemId);
         Task<(Item, List<ImageDto>)> NewItem(Item item, List<IFormFile> images);
     }
 }

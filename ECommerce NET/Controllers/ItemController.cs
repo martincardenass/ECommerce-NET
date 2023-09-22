@@ -17,7 +17,7 @@ namespace ECommerce_NET.Controllers
             _itemService = itemService;
         }
 
-        [Authorize(Roles = "user")]
+        [Authorize(Roles = "user, admin")]
         [HttpGet("all")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
         public async Task<IActionResult> GetItems()
@@ -27,7 +27,7 @@ namespace ECommerce_NET.Controllers
             return Ok(items);
         }
 
-        [Authorize(Roles = "user")]
+        [Authorize(Roles = "user, admin")]
         [HttpGet("{itemId}")]
         [ProducesResponseType(200, Type = typeof(Item))]
         public async Task<IActionResult> GetItemById(int itemId)

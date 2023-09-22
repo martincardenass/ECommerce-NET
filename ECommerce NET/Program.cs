@@ -13,10 +13,12 @@ builder.Services.AddScoped<IUser, UserRepository>();
 builder.Services.AddScoped<IImage, ImageRepository>();
 builder.Services.AddScoped<INotification, NotificationRepository>();
 builder.Services.AddScoped<ICategory, CategoryRepository>();
+builder.Services.AddScoped<IReview, ReviewRepository>();
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
