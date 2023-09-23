@@ -7,5 +7,6 @@
         public string Image_Url { get; set; }
         public DateTimeOffset Added { get; set; }
         public Item? Item { get; set; }
+        public string Public_Id { get; set; }
     }
 }

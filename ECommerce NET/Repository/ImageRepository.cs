@@ -24,12 +24,14 @@ namespace ECommerce_NET.Repository
             foreach (var image in images)
             {
                 // 0s for width and height for no crop
-                string? imageUrl = await UploadToCloudinary(image, 0, 0);
+                var (imageUrl, publicId) = await UploadToCloudinary(image, 0, 0);
+
                 var newImage = new Image
                 {
                     Item_Id = itemId,
                     Image_Url = imageUrl,
-                    Added = DateTimeOffset.UtcNow
+                    Added = DateTimeOffset.UtcNow,
+                    Public_Id = publicId // Cloudinary Id later used for deletion or managing the image
                 };
                 
                 _context.Add(newImage);
@@ -56,7 +58,7 @@ namespace ECommerce_NET.Repository
             .Where(i => i.Item_Id.Equals(itemId))
             .ToListAsync();
 
-        public async Task<string> UploadToCloudinary(IFormFile file, int width, int height)
+        public async Task<(string imageUrl, string publicId)> UploadToCloudinary(IFormFile file, int width, int height)
         {
             if(file is not null && file.Length > 0)
             {
@@ -83,9 +85,9 @@ namespace ECommerce_NET.Repository
                     throw new Exception(uploadResult.Error.Message);
                 }
 
-                return uploadResult.SecureUrl.ToString();
+                return (uploadResult.SecureUrl.ToString(), uploadResult.PublicId);
             }
-            return null;
+            return (null, null);
         }
     }
 }

@@ -143,7 +143,7 @@ namespace ECommerce_NET.Repository
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password, salt);
 
             // * 300 * 300 its the profile picture size
-            string? profilePictureUrl = await _imageService.UploadToCloudinary(file, 300, 300);
+            var (imageUrl, _) = await _imageService.UploadToCloudinary(file, 300, 300);
 
             var newUser = new User()
             {
@@ -153,7 +153,7 @@ namespace ECommerce_NET.Repository
                 Last_Name = user.Last_Name,
                 Password = hashedPassword,
                 Gender = user.Gender,
-                Profile_Picture = profilePictureUrl,
+                Profile_Picture = imageUrl,
                 Last_Login = user.Last_Login,
                 Email = user.Email,
                 Created = DateTime.UtcNow
@@ -173,18 +173,19 @@ namespace ECommerce_NET.Repository
                 hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password, salt);
             }
 
-            string? newProfilePictureUrl = await _imageService.UploadToCloudinary(file, 300, 300);
+            var (imageUrl, _) = await _imageService.UploadToCloudinary(file, 300, 300);
 
             var userToModify = await _context.Users
                 .FindAsync(userId);
 
             if(userToModify is not null)
             {
+                // Might change this to use the foreach function that I use on the reviews
                 userToModify.First_Name = user.First_Name ?? userToModify.First_Name;
                 userToModify.Last_Name = user.Last_Name ?? userToModify.Last_Name;
                 userToModify.Password = hashedPassword ?? userToModify.Password;
                 userToModify.Gender = user.Gender ?? userToModify.Gender;
-                userToModify.Profile_Picture = newProfilePictureUrl ?? userToModify.Profile_Picture;
+                userToModify.Profile_Picture = imageUrl ?? userToModify.Profile_Picture;
                 userToModify.Email = user.Email ?? userToModify.Email;
 
                 _context.Update(userToModify);
