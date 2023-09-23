@@ -10,5 +10,6 @@ namespace ECommerce_NET.Interfaces
         Task<Item> GetItemById(int id);
         Task<bool> DoesItemExist(int itemId);
         Task<(Item, List<ImageDto>, List<ItemVariantDto>)> NewItem(Item item, List<IFormFile> images, List<ItemVariant> itemVariants);
+        Task<bool> DeleteItem(Item item);
     }
 }

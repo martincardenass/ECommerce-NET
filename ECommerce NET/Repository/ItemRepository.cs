@@ -19,6 +19,32 @@ namespace ECommerce_NET.Repository
             _itemVariantService = itemVariantService;
         }
 
+        public async Task<bool> DeleteItem(Item item)
+        {
+            var variants = await _itemVariantService.GetItemVariantsByItemId(item.Item_Id);
+
+            if(variants is not null)
+            {
+                _context.RemoveRange(variants);
+            }
+
+            var images = await _imageService.GetImagesByItemId(item.Item_Id);
+
+            if(images is not null)
+            {
+                // Will implement cloud deletion too
+                //foreach(var image in images)
+                //{
+                //    var removeResult = await 
+                //}
+
+                _context.RemoveRange(images);
+            }
+
+            _context.Remove(item);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
         public async Task<bool> DoesItemExist(int itemId)
         {
             return await _context.Items

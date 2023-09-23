@@ -3,9 +3,6 @@ using ECommerce_NET.Dto;
 using ECommerce_NET.Interfaces;
 using ECommerce_NET.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 
 namespace ECommerce_NET.Repository
 {

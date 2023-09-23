@@ -2,6 +2,7 @@
 using ECommerce_NET.Dto;
 using ECommerce_NET.Interfaces;
 using ECommerce_NET.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce_NET.Repository
 {
@@ -13,6 +14,10 @@ namespace ECommerce_NET.Repository
         {
             _context = context;
         }
+
+        public async Task<List<ItemVariant>> GetItemVariantsByItemId(int itemId) => await _context.ItemVariants
+                .Where(i => i.Item_Id.Equals(itemId))
+                .ToListAsync();
 
         public async Task<List<ItemVariantDto>> NewItemVariant(int itemId, List<ItemVariant> variants)
         {

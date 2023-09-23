@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using ECommerce_NET.Data;
 using ECommerce_NET.Interfaces;
 using ECommerce_NET.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce_NET.Repository
 {
@@ -40,6 +41,20 @@ namespace ECommerce_NET.Repository
 
             return imageCollection;
         }
+
+        public Task<bool> DeleteImagesFromCloud(List<Image> images)
+        {
+            //foreach (var image in images)
+            //{
+            //    string publicId = image.;
+            //    var deletionResult = await _cloudinary.DestroyAsync(image);
+            //}
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<Image>> GetImagesByItemId(int itemId) => await _context.Images
+            .Where(i => i.Item_Id.Equals(itemId))
+            .ToListAsync();
 
         public async Task<string> UploadToCloudinary(IFormFile file, int width, int height)
         {
