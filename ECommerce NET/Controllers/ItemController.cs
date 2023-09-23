@@ -40,9 +40,9 @@ namespace ECommerce_NET.Controllers
         [Authorize(Roles = "admin")]
         [HttpPost("new")]
         [ProducesResponseType(200, Type = typeof(Item))]
-        public async Task<IActionResult> CreateNewItem([FromForm] Item item, [FromForm] List<IFormFile?> images)
+        public async Task<IActionResult> CreateNewItem([FromForm] Item item, [FromForm] List<IFormFile?> images, [FromForm] List<ItemVariant?> variants)
         {
-            var (newItem, imageCollection) = await _itemService.NewItem(item, images);
+            var (newItem, imageCollection, variantsCollection) = await _itemService.NewItem(item, images, variants);
 
             var itemDto = new NewItemDto
             {
@@ -51,7 +51,8 @@ namespace ECommerce_NET.Controllers
                 Item_Description = newItem.Item_Description,
                 Added = newItem.Added,
                 Category_Id = newItem.Category_Id,
-                Images = imageCollection
+                Images = imageCollection,
+                Variants = variantsCollection
             };
 
             return Ok(itemDto);

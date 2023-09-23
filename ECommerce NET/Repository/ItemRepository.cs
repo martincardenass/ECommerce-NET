@@ -10,11 +10,13 @@ namespace ECommerce_NET.Repository
     {
         private readonly ApplicationDbContext _context;
         private readonly IImage _imageService;
+        private readonly IItemVariant _itemVariantService;
 
-        public ItemRepository(ApplicationDbContext context, IImage imageService)
+        public ItemRepository(ApplicationDbContext context, IImage imageService, IItemVariant itemVariantService)
         {
             _context = context;
             _imageService = imageService;
+            _itemVariantService = itemVariantService;
         }
 
         public async Task<bool> DoesItemExist(int itemId)
@@ -68,7 +70,7 @@ namespace ECommerce_NET.Repository
             return items;
         }
 
-        public async Task<(Item, List<ImageDto>)> NewItem(Item item, List<IFormFile> images)
+        public async Task<(Item, List<ImageDto>, List<ItemVariantDto>)> NewItem(Item item, List<IFormFile> images, List<ItemVariant> itemVariants)
         {
             var newItem = new Item
             {
@@ -81,6 +83,8 @@ namespace ECommerce_NET.Repository
             _context.Add(newItem);
 
             _ = await _context.SaveChangesAsync();
+
+            // Images collection, if images provided.
 
             List<ImageDto> imageCollection = new();
 
@@ -95,7 +99,23 @@ namespace ECommerce_NET.Repository
                 }).ToList());
             }
 
-            return (newItem, imageCollection);
+            // Item variations, if variations provided
+
+            List<ItemVariantDto> variantsCollection = new();
+            if(itemVariants is not null && itemVariants.Count > 0)
+            {
+                var variants = await _itemVariantService.NewItemVariant(newItem.Item_Id, itemVariants);
+
+                variantsCollection.AddRange(variants.Select(v => new ItemVariantDto
+                {
+                    Variant_Id = v.Variant_Id,
+                    Variant_Name = v.Variant_Name,
+                    Variant_Value = v.Variant_Value,
+                    Item_Id = v.Item_Id
+                }));
+            }
+
+            return (newItem, imageCollection, variantsCollection);
         }
     }
 }

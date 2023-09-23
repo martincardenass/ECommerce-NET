@@ -10,5 +10,6 @@ namespace ECommerce_NET.Dto
         public DateTimeOffset Added { get; set; }
         public int Category_Id { get; set; }
         public ICollection<ImageDto>? Images { get; set; }
+        public ICollection<ItemVariantDto>? Variants { get; set; }
     }
 }

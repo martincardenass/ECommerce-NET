@@ -80,8 +80,6 @@ namespace ECommerce_NET.Repository
 
         public async Task<ReviewDto> UpdateReview(int reviewId, ReviewDto review)
         {
-            Stopwatch stopwatch = new();
-            stopwatch.Start();
             var existingReview = await GetReviewById(reviewId);
 
             if (existingReview is not null)
@@ -91,7 +89,7 @@ namespace ECommerce_NET.Repository
 
                 foreach (var prop in props)
                 {
-                    // Skin unnecessary int iteration
+                    // Skip unnecessary int iteration
                     if (prop.PropertyType.Equals(typeof(int)))
                     {
                         continue;
@@ -136,10 +134,6 @@ namespace ECommerce_NET.Repository
                 Review_Content = existingReview.Review_Content,
                 Modified = existingReview.Modified,
             };
-
-            stopwatch.Stop();
-            double elapsedMilliseconds = stopwatch.Elapsed.TotalSeconds;
-            Debug.WriteLine(elapsedMilliseconds);
 
             return reviewUpdatedToReturn;
         }
