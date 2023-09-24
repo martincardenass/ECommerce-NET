@@ -7,6 +7,6 @@ namespace ECommerce_NET.Interfaces
         Task<(string imageUrl, string publicId)> UploadToCloudinary(IFormFile file, int width, int height);
         Task<ICollection<Image>> AddImagesToItem(ICollection<IFormFile> images, int imageId);
         Task<List<Image>> GetImagesByItemId(int itemId);
-        Task<bool> DeleteImagesFromCloud(List<Image> images);
+        Task<(List<string> errorMessages, bool result)> DeleteImagesFromCloud(List<Image> images);
     }
 }

@@ -44,14 +44,53 @@ namespace ECommerce_NET.Repository
             return imageCollection;
         }
 
-        public Task<bool> DeleteImagesFromCloud(List<Image> images)
+        public async Task<(List<string> errorMessages, bool result)> DeleteImagesFromCloud(List<Image> images)
         {
-            //foreach (var image in images)
-            //{
-            //    string publicId = image.;
-            //    var deletionResult = await _cloudinary.DestroyAsync(image);
-            //}
-            throw new NotImplementedException();
+            // We assume all images will be deleted
+            bool allImagesDeletedSuccessfully = true;
+
+            // List to store publicIds of failed deletions
+            List<string> failedDeletions = new();
+
+            foreach (var image in images)
+            {
+                string publicId = image.Public_Id;
+
+                DeletionParams deletionParams = new(publicId);
+
+                // 3 attempts to delete any of the images
+                int maxRetries = 3;
+
+                for(int retryCount = 0; retryCount < maxRetries; retryCount++)
+                {
+                    try
+                    {
+                        DeletionResult deletionResult = await _cloudinary.DestroyAsync(deletionParams);
+
+                        if(deletionResult.Result is "ok")
+                        {
+                            // If it fails, and then it gets deleted in a retry, delete it from de failedDeletions list (havent tested this!)
+                            if(failedDeletions.Contains(deletionResult.Result))
+                            {
+                                failedDeletions.Remove(deletionResult.Result);
+                                allImagesDeletedSuccessfully = true;
+                            }
+                            break; // Deletion success : Exit the retry loop
+                        }
+                        else
+                        {
+                            failedDeletions.Add(publicId); // Add the non deleted publicId to the failedDeletions list
+                            allImagesDeletedSuccessfully = false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        failedDeletions.Add($"Error deleting image with public ID: {publicId}. Error message: {ex.Message}");
+                    }
+                }
+            }
+
+            return (failedDeletions.Distinct().ToList(), allImagesDeletedSuccessfully);
         }
 
         public async Task<List<Image>> GetImagesByItemId(int itemId) => await _context.Images
@@ -69,7 +108,8 @@ namespace ECommerce_NET.Repository
                     File = new FileDescription(file.FileName, stream),
                     UseFilename = true,
                     UniqueFilename = true,
-                    Overwrite = true
+                    Overwrite = true,
+                    Transformation = new Transformation().Quality(50).FetchFormat("webp")
                 };
 
                 // If width and height arguements are given crop the image accordingly

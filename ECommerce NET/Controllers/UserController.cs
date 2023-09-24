@@ -75,9 +75,9 @@ namespace ECommerce_NET.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> Signup([FromForm] User user, [FromForm] IFormFile file)
+        public async Task<IActionResult> Signup([FromForm] User user, [FromForm] IFormFile profilePicture)
         {
-            var newUser = await _userService.RegisterUser(user, file);
+            var newUser = await _userService.RegisterUser(user, profilePicture);
 
             return Ok(new { Created = newUser });
         }

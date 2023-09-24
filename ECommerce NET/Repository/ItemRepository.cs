@@ -1,4 +1,5 @@
-﻿using ECommerce_NET.Data;
+﻿
+using ECommerce_NET.Data;
 using ECommerce_NET.Dto;
 using ECommerce_NET.Interfaces;
 using ECommerce_NET.Models;
@@ -19,30 +20,44 @@ namespace ECommerce_NET.Repository
             _itemVariantService = itemVariantService;
         }
 
-        public async Task<bool> DeleteItem(Item item)
+        public async Task<(string deletionResult, List<string> failedPublicIds, bool result)> DeleteItem(Item item)
         {
             var variants = await _itemVariantService.GetItemVariantsByItemId(item.Item_Id);
 
-            if(variants is not null)
+            if(variants.Count > 0)
             {
                 _context.RemoveRange(variants);
             }
 
             var images = await _imageService.GetImagesByItemId(item.Item_Id);
 
-            if(images is not null)
-            {
-                // Will implement cloud deletion too
-                //foreach(var image in images)
-                //{
-                //    var removeResult = await 
-                //}
+            string? deletionResult = string.Empty;
+            List<string> failedIds = new();
 
-                _context.RemoveRange(images);
+            if(images.Count > 0)
+            {
+                // Delete images from the cloud too
+                var (errorMessages, result) = await _imageService.DeleteImagesFromCloud(images);
+
+                failedIds.AddRange(errorMessages);
+
+                if (result)
+                {
+                    _context.RemoveRange(images);
+                }
+
+                if(errorMessages.Count > 0)
+                {
+                    deletionResult = "One or more images failed to be deleted from Cloudinary, but they have been deleted from the database.";
+                } else if (errorMessages.Count <= 0)
+                {
+                    deletionResult = "All images have been deleted from Cloudinary and from the database";
+                }
             }
 
             _context.Remove(item);
-            return await _context.SaveChangesAsync() > 0;
+
+            return (deletionResult, failedIds, await _context.SaveChangesAsync() > 0);
         }
 
         public async Task<bool> DoesItemExist(int itemId)
@@ -120,8 +135,9 @@ namespace ECommerce_NET.Repository
 
                 imageCollection.AddRange(imgs.Select(i => new ImageDto
                 {
-                    Image_Id = i.Item_Id,
-                    Image_Url = i.Image_Url
+                    Image_Id = i.Image_Id,
+                    Image_Url = i.Image_Url,
+                    Public_Id = i.Public_Id
                 }).ToList());
             }
 

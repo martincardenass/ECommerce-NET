@@ -60,7 +60,7 @@ namespace ECommerce_NET.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpDelete("delete/{itemId}")]
-        [ProducesResponseType(204)]
+        [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteItem(int itemId)
         {
@@ -71,15 +71,21 @@ namespace ECommerce_NET.Controllers
                 return BadRequest();
             }
 
-            var removed = await _itemService.DeleteItem(item);
+            var (deletionResult, failedPublicIds, result) = await _itemService.DeleteItem(item);
 
-            if(!removed)
+            if(!result)
             {
                 ModelState.AddModelError("", "Something went wrong");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            var messageToReturn = new DeletionResponseDto {
+                Deleted = result,
+                Message = deletionResult,
+                FailedPublicIds = failedPublicIds,
+            };
+
+            return Ok(messageToReturn);
         }
     }
 }
